@@ -1,0 +1,36 @@
+<!--index.wxml-->
+<view class="container">
+   <view class="nothing" wx:if="{{list.length==0}}">
+     <image src="../../src/nothing.png"></image>
+     <text>暂无信息</text>
+   </view>
+   <view class="offset"></view>
+   <view class="search-box">
+   <view class="input-box">
+     <icon type="search" size="18" color="#999"/>
+     <input type="text" placeholder="请输入昵称搜索" bindinput="searchname" value="{{name}}"/>
+     <icon type="cancel" size="24" color="#999" wx:if="{{name}}" bindtap="nosearch"/>
+   </view>
+   <image bindtap="setting" class="setting"/>
+  </view>
+  <view class="listitem">
+      <view class="infobox">
+        <image class="avatar"></image>
+        <view class="name">
+           <text class="title oneline-only">邀请微信好友</text>
+       </view>
+      </view>
+  </view>
+  <view class="friend-num">
+    <text>好友列表</text>
+    <text>23/50</text>
+  </view>
+   <view class="listitem" wx:for="{{list}}">
+     <view class="infobox">
+       <image class="avatar" src="{{item.avatar}}"></image>
+       <view class="name">
+          <text class="title oneline-only">{{item.nick_name}}</text>
+      </view>
+     </view>
+   </view>
+</view>

@@ -1,7 +1,11 @@
 {
   "pages": [
-    "pages/auth/auth",
     "pages/index/index",
+    "pages/auth/auth",
+    "pages/add/add",
+    "pages/user/user",
+    "pages/edit/edit",
+    "pages/friends/friends",
     "pages/userConsole/userConsole",
     "pages/storageConsole/storageConsole",
     "pages/databaseGuide/databaseGuide",

@@ -1,43 +1,58 @@
 <!--index.wxml-->
 <view class="container">
-
-  <!-- 用户 openid -->
-  <view class="userinfo">
-    <button 
-      open-type="getUserInfo" 
-      bindgetuserinfo="onGetUserInfo"
-      class="userinfo-avatar"
-      style="background-image: url({{avatarUrl}})"
-    ></button>
-    <view>
-      <button class="userinfo-nickname" bindtap="onGetOpenid">点击获取 openid</button>
-    </view>
-  </view>
-
-
-  <!-- 上传图片 -->
-  <view class="uploader">
-    <view class="uploader-text" bindtap="doUpload">
-      <text>上传图片</text>
-    </view>
-    <view class="uploader-container" wx:if="{{imgUrl}}">
-      <image class="uploader-image" src="{{imgUrl}}" mode="aspectFit" bindtap="previewImg"></image>
-    </view>
-  </view>
-
-
-  <!-- 操作数据库 -->
-  <view class="uploader">
-    <navigator url="../databaseGuide/databaseGuide" open-type="navigate" class="uploader-text">
-      <text>前端操作数据库</text>
+    <navigator class="addbtn" url="../add/add">
+      <image src="/images/add.png" mode="widthFix"/>
     </navigator>
-  </view>
-
-  <!-- 新建云函数 -->
-  <view class="uploader">
-    <navigator url="../addFunction/addFunction" open-type="navigate" class="uploader-text">
-      <text>快速新建云函数</text>
-    </navigator>
-  </view>
-
+   <view class="tab">
+     <view class="tab-item {{activearr[0]}}" bindtap="switchtab" data-index="0">众乐乐</view>
+     <view class="tab-item {{activearr[1]}}" bindtap="switchtab" data-index="1">独乐乐</view>
+   </view>
+   <view class="list">
+     <view class="list-item" wx:for="{{list}}" wx:for-key="index" wx:for-index="index">
+       <!-- 头像 -->
+        <view class="avatar-box">
+          <view class="time-line">
+            {{item.createTime}}
+          </view>
+          <view class="avatar-container">
+              <image src="{{item.avatar}}" class="avatar" mode="aspectFill" />
+          </view>
+          <view class="nick-name">{{item.nickname}}</view>
+        </view>
+        <!-- 内容 -->
+        <view class="content-box">
+          <text class="content-text" wx:if="{{item.content}}">
+            {{item.content}}
+          </text>
+          <view class="image-wrap" wx:if="{{item.images.length>0}}">
+            <image wx:for="{{item.images}}" wx:for-item="inner" src="{{inner}}"></image>
+          </view>
+          <view class="rate-wrap">
+            <view class="emoji-wrap">
+              <view class="emoji-item" wx:for="{{item.like}}" wx:for-item="inner">
+                <image class="avatar-item" src="{{inner.avatar}}"></image>
+                <image class="emoji-img" style="background: {{inner.color}}"></image>
+              </view>
+              <view class="emoji-item">
+                  <image class="avatar-item"></image>
+                  <image class="emoji-img"></image>
+                </view>
+            </view>
+            <view class="rate-area">
+              <view class="rate-item" wx:for="{{item.rate}}" wx:for-item="inner">
+                <image class="avatar-img" src="{{inner.avatar}}"></image>
+                 <view class="rate-content">
+                   <view class="rate-text">
+                     <text class="name">{{inner.nickname}}:</text> {{inner.content}}
+                   </view>
+                   <view class="time-location">
+                     {{inner.createTime}}{{location}}
+                   </view>
+                 </view>
+              </view>
+            </view>
+          </view>
+        </view>
+     </view>
+   </view>
 </view>
