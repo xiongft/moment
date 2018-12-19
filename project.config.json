@@ -28,13 +28,13 @@
 			"list": []
 		},
 		"miniprogram": {
-			"current": 3,
+			"current": 0,
 			"list": [
 				{
 					"id": 0,
-					"name": "add",
-					"pathName": "pages/add/add",
-					"query": ""
+					"name": "index",
+					"pathName": "pages/index/index",
+					"query": "id=XBdSx8DR1TiN55N3"
 				},
 				{
 					"id": -1,
@@ -52,6 +52,12 @@
 					"id": -1,
 					"name": "friends",
 					"pathName": "pages/friends/friends",
+					"query": ""
+				},
+				{
+					"id": -1,
+					"name": "addf",
+					"pathName": "pages/addFunction/addFunction",
 					"query": ""
 				}
 			]

@@ -1,14 +1,31 @@
 // pages/demo/demo.js
 let app =getApp()
+const db = wx.cloud.database()
 Page({
   data: {
   },
   bindGetUserInfo: function (e) {
     let that = this
     if (e.detail.userInfo) {
-      app.globalData.userInfo = e.detail.userInfo
-      wx.reLaunch({
-        url: '/'+that.data.page+'?'+that.data.querystring
+      wx.cloud.callFunction({
+        name: 'login',
+        data: {
+          nickname: e.detail.userInfo.nickName,
+          avatar: e.detail.userInfo.avatarUrl
+        },
+        success: resp => {
+          app.globalData.openid = resp.result.openid
+          app.login({
+            nickname: e.detail.userInfo.nickName,
+            avatar: e.detail.userInfo.avatarUrl
+          })
+          wx.reLaunch({
+            url: '/'+that.data.page+'?'+that.data.querystring
+          })
+        },
+        fail: err => {
+          
+        }
       })
     }
   },

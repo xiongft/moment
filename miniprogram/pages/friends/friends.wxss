@@ -17,9 +17,8 @@
   width:100%;
   background: #fff;
   display: flex;
-  padding:36rpx 62rpx 36rpx 32rpx;
-  justify-content: space-between;
-  align-items: center;
+  padding:20rpx 62rpx 20rpx 32rpx;
+  justify-content: space-between;  align-items: center;
   border-bottom:1rpx solid #f8f8f8
 }
 .rightpart{
@@ -29,6 +28,11 @@
 }
 .infobox{
   display: flex;
+}
+.wxavatar{
+  width:74rpx;
+  height:74rpx;
+  margin-right:20rpx
 }
 .avatar{
   background: #D8D8D8;
@@ -94,7 +98,7 @@
 .setting{
   width:60rpx;
   height:60rpx;
-  background: #ccc
+  background: #fff
 }
 .input-box{
   display: flex;

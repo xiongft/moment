@@ -1,17 +1,13 @@
 //index.js
 //获取应用实例
 const app = getApp()
-var page = 1
-var onPage = 1
+const db = wx.cloud.database()
+const _ = db.command
+
 Page({
   data: {
-    list: [
-      {
-        nick_name: 'kcl',
-        avatar: '123.png'
-
-      }
-    ],
+    list: [],
+    newlist: [],
     name: '',
     nomore : false
   },
@@ -25,109 +21,157 @@ Page({
   },
   nosearch () {
     this.setData({
-      list: [],
+      newlist: [],
       name: ''
     })
-    page =1
-    onPage =1
-    this.getList()
   },
   searchname (e) {
     var name = e.detail.value
-    let list = []
     let that = this
-    wx.nextTick(() => {
-      that.setData({
-        list,
-        name
-      })
-      page = 1 
-      onPage =1
-      that.getList()
+    that.setData({
+      name
     })
+    if(name == '') {
+      that.setData({
+        newlist: []
+      })
+      return
+    }
+    that.searchFriends(name)
   },
   clear (e) {
     let that = this
+    let id = that.data.list[e.currentTarget.dataset.index]._id
     let index = e.currentTarget.dataset.index
+    console.log(id, app.globalData.myid)
     wx.showModal({
       content: '确定删除?',
       success (res) {
         if (res.confirm) {
-          commAction.getdata({
-            version: 1.1,
-            operate: 'friendShipSet',
-            execAction: 'unFriend',
-            friend_id: that.data.list[index].friend_id,
-            user_id: wx.getStorageSync('userid')||73
-          }).then(res => {
-            that.getList()
+          wx.cloud.callFunction({
+            name: 'clearfriend',
+            data: {
+              id,
+              myid: app.globalData.myid
+            },
+            success: res => {
+              wx.hideLoading()
+              let newlist = that.data.list
+              newlist.splice(index, 1)
+              that.setData({
+                list: newlist
+              })
+              wx.showToast({
+                title: '删除成功',
+                icon: 'success'
+              })
+            },
+            fail: err => {
+              
+            }
           })
         }
     }
     })
   },
-  getList() {
+  searchFriends(name) {
      let that = this
      wx.showLoading({
       title: '加载中'
     })
-    onPage = page
-    commAction.getdata({
-      version: 1.1,
-      operate:'friendListGet',
-      user_id: wx.getStorageSync('userid')||73,
-      recordCount:20,
-      pageNo: page,
-      nickname: that.data.name
-    }).then( (res) => {
-      if (res.resCode == '000') {
-      that.setData({
-        list: that.data.list.concat(res.resData.map(x=> {
-          if(x.icon_url.indexOf('http')<0) {
-            x.icon_url = that.data.domain+x.icon_url
-          }
-          return x
-        }))
-      })
-      if(res.resData.length<20) {
+    wx.cloud.callFunction({
+      name: 'searchuser',
+      data: {
+        nickname: name
+      },
+      success: res => {
+        console.log(res)
+        wx.hideLoading()
         that.setData({
-          nomore: true
+          newlist: res.result.data
         })
+      },
+      fail: err => {
+        
       }
-      page ++
-      wx.hideLoading()
-    } else {
-      wx.showModal({
-        content: res.resMsg,
-        showCancel: false
-      })
-    }
     })
   },
-  onPullDownRefresh: function(){
+  getList() {
     let that = this
-    page = 1
-    onPage = 1
-    that.setData({
-      nomore: false
-    })
-    that.getList()
-    wx.stopPullDownRefresh()
-  },
-  onReachBottom () {
-    if(onPage == page && that.data.nomore) {
-      return
-    } else {
-      this.getList()
+    wx.showLoading({
+     title: '加载中'
+   })
+   wx.cloud.callFunction({
+     name: 'getmyfriends',
+     data: {
+     },
+     success: res => {
+       wx.hideLoading()
+       that.setData({
+         list: res.result||[]
+       })
+     },
+     fail: err => {
+       
+     }
+   })
+ },
+ addfriend (e) {
+   let that = this
+   let id = that.data.newlist[e.currentTarget.dataset.index]._id
+   let openid = that.data.newlist[e.currentTarget.dataset.index]._openid
+   wx.cloud.callFunction({
+    name: 'addfriend',
+    data: {
+      id,
+      myid: app.globalData.myid
+    },
+    success: res => {
+      wx.hideLoading()
+      console.log(res.result)
+      let list = that.data.list
+      list.push(res.result.data)
+      let newlist = that.data.newlist
+      newlist[e.currentTarget.dataset.index].status = 1
+      that.setData({
+        list,
+        newlist
+      })
+      wx.showToast({
+        title: '添加成功',
+        icon: 'success'
+      })
+    },
+    fail: err => {
+      
     }
-  },
+  })
+ },
+ onShareAppMessage(res) {
+  return {
+    title: '快来试试吧',
+    path: '/pages/index/index?id='+app.globalData.myid
+  }
+},
+  // onPullDownRefresh: function(){
+  //   let that = this
+  //   page = 1
+  //   onPage = 1
+  //   that.setData({
+  //     nomore: false
+  //   })
+  //   that.getList()
+  //   wx.stopPullDownRefresh()
+  // },
+  // onReachBottom () {
+  //   if(onPage == page && that.data.nomore) {
+  //     return
+  //   } else {
+  //     this.getList()
+  //   }
+  // },
   onLoad () {
     let that = this
-        page = 1
-        onPage = 1
-        that.setData({
-          nomore: false
-        })
-    // that.getList()
+    that.getList()
   }
 })

@@ -5,6 +5,8 @@ Page({
     money: '',
     people: '',
     imglist: [],
+    videolist: [],
+    cover: '',
     lasttimeopen: false,
     sending: false,
     location: ''
@@ -37,11 +39,23 @@ Page({
     let that = this
     let index = e.currentTarget.dataset.index
     wx.previewImage({
-      urls: that.data.imglist.map(x => {
-        x = that.data.domain+x
-        return x
-      }),
-      current: that.data.domain+that.data.imglist[index]
+      urls: that.data.imglist,
+      current: that.data.imglist[index]
+    })
+  },
+  clearvideo (e) {
+    let that = this
+    let index = e.currentTarget.dataset.index
+    wx.showModal({
+      content: '确定删除此视频?',
+      success (res) {
+        if(res.confirm) {
+          that.data.videolist.splice(index, 1)
+          that.setData({
+            videolist: that.data.videolist
+          })
+        }
+      }
     })
   },
   clearimg (e) {
@@ -59,10 +73,84 @@ Page({
       }
     })
   },
+  add () {
+    let that = this
+    if (that.data.imglist.length == 0 && that.data.videolist.length == 0) {
+      wx.showActionSheet({
+        itemList: ['照片', '视频'],
+        success(res) {
+          if(res.tapIndex == 0) {
+            that.addimg()
+          } else {
+            that.addvideo()
+          }
+        }
+      })
+    } else {
+      that.addimg()
+    }
+  },
+  addvideo () {
+    let that = this
+    wx.chooseVideo({
+      sizeType: ['compressed'],
+      maxDuration: 15,
+      success (res) {
+        console.log(res)
+        let filePath = res.tempFilePath
+        wx.showLoading({
+          title: '上传中'
+        })
+        // 上传视频
+        const cloudPath = 'image-'+app.globalData.openid +  new Date().getTime() + filePath.match(/\.[^.]+?$/)[0]
+        wx.cloud.uploadFile({
+          cloudPath,
+          filePath,
+          success: resp => {
+            that.setData({
+              videolist: [resp.fileID]
+            })
+          },
+          fail: e => {
+            console.error('[上传文件] 失败：', e)
+            wx.showToast({
+              icon: 'none',
+              title: '上传失败',
+            })
+          },
+          complete: () => {
+            wx.hideLoading()
+          }
+        })
+        if (res.thumbTempFilePath) {
+          let coverPath = 'image-'+app.globalData.openid +  new Date().getTime() + res.thumbTempFilePath.match(/\.[^.]+?$/)[0]
+        wx.cloud.uploadFile({
+          cloudPath: coverPath,
+          filePath: res.thumbTempFilePath,
+          success: resp => {
+            that.setData({
+              cover: resp.fileID
+            })
+          },
+          fail: e => {
+            console.error('[上传文件] 失败：', e)
+            wx.showToast({
+              icon: 'none',
+              title: '上传失败',
+            })
+          },
+          complete: () => {
+            wx.hideLoading()
+          }
+        })
+        }
+      }
+    })
+  },
   addimg () {
     let that = this
     wx.chooseImage({
-      count: 3 - that.data.imglist.length,
+      count: 9 - that.data.imglist.length,
       sizeType: ['compressed'],
       success (res) {
         let tem = res.tempFilePaths
@@ -70,59 +158,42 @@ Page({
           title: '上传中'
         })
         for(var i=0;i< tem.length; i++) {
-          wx.uploadFile({
-            url: common.CONST.uploadDomain+`?operate=fileUpload&version=1.1&user_id=${wx.getStorageSync('userid')}&fileNumber=1`, 
-            filePath: tem[i],
-            name: 'file',
-            success (res){
-              if (app.clearData(res.data).resCode == '000') {
-                that.data.imglist.push(app.clearData(res.data).resData)
-                that.setData({
-                  imglist: that.data.imglist
-                })
-                if (i == tem.length) {
-                  wx.hideLoading()
-                }
-              }
-            }}
-          )
+          let filePath = tem[i]
+        
+        // 上传图片
+        const cloudPath = 'image-'+app.globalData.openid+ i +  new Date().getTime() + filePath.match(/\.[^.]+?$/)[0]
+        wx.cloud.uploadFile({
+          cloudPath,
+          filePath,
+          success: resp => {
+            console.log(resp.fileID)
+            let imglist = that.data.imglist
+            imglist.push(resp.fileID)
+            console.log(imglist)
+            that.setData({
+             imglist: imglist
+            })
+          },
+          fail: e => {
+            console.error('[上传文件] 失败：', e)
+            wx.showToast({
+              icon: 'none',
+              title: '上传失败',
+            })
+          },
+          complete: () => {
+            wx.hideLoading()
+          }
+        })
         }
       }
     })
   },
   release () {
     let that = this
-    if(!that.data.content) {
+    if(!that.data.content && that.data.imglist.length==0 && that.data.videolist.length==0) {
       wx.showModal({
-        content: '请输入任务细节',
-        showCancel: false
-      })
-      return
-    }
-    if(that.data.imglist.length == 0) {
-      wx.showModal({
-        content: '请至少上传一张图片',
-        showCancel: false
-      })
-      return
-    }
-    if(!that.data.money) {
-      wx.showModal({
-        content: '请输入总投入',
-        showCancel: false
-      })
-      return
-    }
-    if(!that.data.people) {
-      wx.showModal({
-        content: '请输入最大转发人数',
-        showCancel: false
-      })
-      return
-    }
-    if(that.data.money/that.data.people < 10) {
-      wx.showModal({
-        content: '人均不能低于10个互助币',
+        content: '请输入动态内容，图片，视频',
         showCancel: false
       })
       return
@@ -134,42 +205,36 @@ Page({
     that.setData({
       sending: true
     })
-    commAction.getdata({
-      version: 1.2,
-      operate:'helpCircleAdd',
-      publisher:wx.getStorageSync('userid')||73,
-      coin_total:that.data.money,
-      content: that.data.content,
-      parti_chances: that.data.people,
-      img_url: that.data.imglist.join(';'),
-      hc_type: that.data.lasttimeopen ? 3 : 1
-    }).then( (res) => {
-      if (app.clearData(res).resCode == '000') {
+    const db = wx.cloud.database()
+    db.collection('moments').add({
+      data: {
+        imglist: that.data.imglist,
+        cover: that.data.cover,
+        video: that.data.videolist,
+        content: that.data.content,
+        location: that.data.location,
+        createTime: new Date().getTime(),
+        myid: app.globalData.myid
+      },
+      success: res => {
         wx.showToast({
           title: '发布成功',
-          icon: 'success',
           duration: 2000
         })
-        app.globalData.needfresh = true
-        that.setData({
-          sending: false
-        })
-        setTimeout(() => {
-          wx.navigateBack({
-            delta: 1
-          })
-          wx.hideLoading()
-        }, 1500)
-      } else {
-        that.setData({
-          sending: false
-        })
+        setTimeout(
+          function() {
+            wx.navigateBack({
+              delta: 1
+            })
+          }, 2000)
+      },
+      fail: err => {
         wx.showToast({
-          title: app.clearData(res).resMsg,
           icon: 'none',
-          duration: 3000
+          title: '失败'
         })
       }
     })
+    
   }
 })

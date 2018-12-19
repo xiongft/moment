@@ -1,16 +1,41 @@
-// pages/user_edit/user_edit.js
+const  db = wx.cloud.database()
+const app = getApp()
 Page({
 
   /**
    * 页面的初始数据
    */
   data: {
-    myUser:[],
-    userImg:"",
-    uid: 1801345,
-    nickname:'童年的回忆',
-    signname: '回不去的昨天，依然留恋...',
-    upload:false
+    name: ''
+  },
+  onLoad (options) {
+    this.setData({
+      name: options.name
+    })
+  },
+  nameinput (e) {
+    this.setData({
+      name: e.detail.value
+    })
+  },
+  save () {
+    let that = this
+    db.collection('myuser').doc(app.globalData.myid).update({
+      data: {
+        nickname: that.data.name
+      }
+    }).then(res => {
+      wx.showToast({
+        title: '更新成功',
+        icon: 'success'
+      })
+      setTimeout(()=> {
+        wx.navigateBack({
+          delta: 1
+        })
+      }, 2000)
+    })
+
   }
     
 })
