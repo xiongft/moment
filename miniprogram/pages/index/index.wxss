@@ -79,6 +79,11 @@
     display: flex;
     flex-wrap:wrap
   }
+  .list  .list-item .content-box .video-wrap{
+    display: flex;
+    flex-wrap:wrap;
+    position: relative;
+  }
   .list  .list-item .content-box .image-wrap image{
     width:150rpx;
     height:150rpx;
@@ -86,12 +91,22 @@
     margin-top:15rpx;
     background: #ccc
   }
-  .list  .list-item .content-box .image-wrap video{
+  .list  .list-item .content-box .video-wrap .video-cover{
     width:500rpx;
     height:300rpx;
     margin-right:15rpx;
     margin-top:15rpx;
-    background: #ccc
+    background: #323232
+  }
+  .list  .list-item .content-box .video-wrap .video-play{
+    width:500rpx;
+    height:300rpx;
+    margin-right:15rpx;
+    margin-top:15rpx;
+    position: absolute;
+    top:0;
+    left: 0;
+    z-index:3
   }
   .list  .list-item .content-box .rate-wrap {
     margin-top:20rpx;

@@ -33,8 +33,9 @@
           <view class="image-wrap" wx:if="{{item.imglist.length>0}}">
             <image wx:for="{{item.imglist}}" bindtap="showimage" wx:for-item="inner" src="{{inner}}" mode="aspectFill" wx:for-index="innerindex" data-index="{{index}}" data-inner="{{innerindex}}"></image>
           </view>
-          <view class="image-wrap" wx:if="{{item.video.length>0}}">
-            <video src="{{item.video[0]}}" poster="{{item.cover}}"></video>
+          <view class="video-wrap" wx:if="{{item.video.length>0}}">
+            <image src="{{item.cover}}" class="video-cover"></image>
+            <image src="../../images/play.png" class="video-play" bindtap="showvideo"></image>
           </view>
           <view class="location" wx:if="{{item.location}}">
           {{item.location}}
